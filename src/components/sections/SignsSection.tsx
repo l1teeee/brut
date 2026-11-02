@@ -7,9 +7,11 @@ const COLOR_STEPS = 7;
 
 const COLOR_TRANSITION = "transition-colors duration-700 ease-out";
 
-const SECTION_CLASSES =
-  `group relative h-svh overflow-hidden bg-chocolate ${COLOR_TRANSITION} ` +
-  "data-[step=3]:bg-olive data-[step=4]:bg-vanilla data-[step=5]:bg-apricot";
+const SECTION_CLASSES = "group relative h-svh overflow-hidden bg-sky-soft";
+
+const BACKGROUND_CLASSES =
+  `absolute inset-0 rounded-t-[2.5rem] bg-chocolate ${COLOR_TRANSITION} ` +
+  "group-data-[step=3]:bg-olive group-data-[step=4]:bg-vanilla group-data-[step=5]:bg-apricot";
 
 const LEFT_WORD_CLASSES =
   `text-apricot ${COLOR_TRANSITION} ` +
@@ -64,6 +66,7 @@ export default function SignsSection() {
       <h2 id="kitchen-title" className="sr-only">
         Kitchen
       </h2>
+      <div aria-hidden="true" className={BACKGROUND_CLASSES} />
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-[6vh] px-6 sm:flex-row sm:gap-[12vw]">
         {SIGN_WORDS.map((word) => (
           <p key={word.text} className={`${WORD_CLASSES} ${word.classes}`}>

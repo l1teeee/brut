@@ -76,11 +76,12 @@ export default function ConveyorSection() {
     <section
       ref={rootRef}
       aria-labelledby="sorting-title"
-      className="relative h-svh overflow-hidden bg-purple"
+      className="relative h-svh overflow-hidden bg-chocolate"
     >
       <h2 id="sorting-title" className="sr-only">
         Sorting
       </h2>
+      <div aria-hidden="true" className="absolute inset-0 rounded-t-[2.5rem] bg-purple" />
 
       <div className="absolute inset-0 flex flex-col justify-center gap-[6vh] px-6">
         {BELTS.map((belt, index) => (
