@@ -17,6 +17,8 @@ const WORD_CLASSES = "font-sans font-bold uppercase leading-none tracking-tight"
 const CLOUD_TEXT_CLASSES = "block text-white will-change-transform";
 const MAX_SKEW_DEG = 20;
 const SKEW_VELOCITY_DIVISOR = -300;
+const CHIME_SLOTS = 18;
+const CHIME_NOTES: readonly number[] = [784, 880, 1047, 1175, 1319];
 const STORM_HOVER_CLASSES = "pointer-events-auto inline-block transition-colors duration-300 hover:animate-storm hover:text-storm";
 
 const LAYERS: readonly Layer[] = [
@@ -116,14 +118,20 @@ export default function OrchardSection() {
           delay: "random(0, 3)",
         });
 
+        let lastChimeSlot = 0;
         const scroll = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
             start: "top top",
-            end: "+=400%",
+            end: "+=600%",
             pin: true,
             scrub: 1.2,
             onUpdate: (self) => {
+              const chimeSlot = Math.floor(self.progress * CHIME_SLOTS);
+              if (chimeSlot !== lastChimeSlot) {
+                lastChimeSlot = chimeSlot;
+                getSoundEngine().playNote(CHIME_NOTES[chimeSlot % CHIME_NOTES.length]);
+              }
               const target = clampSkew(self.getVelocity() / SKEW_VELOCITY_DIVISOR);
               if (Math.abs(target) > Math.abs(skew.value)) {
                 skew.value = target;

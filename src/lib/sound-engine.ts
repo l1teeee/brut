@@ -1,19 +1,21 @@
 const MASTER_GAIN = 1;
 const NOISE_SECONDS = 2;
 
-const WIND_FILTER_BASE_HZ = 400;
-const WIND_FILTER_RANGE_HZ = 600;
-const WIND_MAX_GAIN = 0.12;
+const WIND_FILTER_BASE_HZ = 600;
+const WIND_FILTER_RANGE_HZ = 1400;
+const WIND_FILTER_Q = 0.8;
+const RUMBLE_FILTER_Q = 0.7;
+const WIND_MAX_GAIN = 0.09;
 const WIND_SMOOTHING_SECONDS = 0.3;
 
 const NOTE_PEAK_GAIN = 0.15;
 const NOTE_DECAY_SECONDS = 1.2;
 const TICK_PEAK_GAIN = 0.08;
 const TICK_DECAY_SECONDS = 0.08;
-const RUMBLE_PEAK_GAIN = 0.18;
+const RUMBLE_PEAK_GAIN = 0.3;
 const RUMBLE_ATTACK_SECONDS = 0.15;
-const RUMBLE_DECAY_SECONDS = 0.7;
-const RUMBLE_FILTER_HZ = 260;
+const RUMBLE_DECAY_SECONDS = 0.9;
+const RUMBLE_FILTER_HZ = 420;
 const CHORD_STAGGER_SECONDS = 0.06;
 
 const UNLOCK_EVENTS = ["pointerdown", "keydown", "touchstart"] as const;
@@ -43,9 +45,20 @@ function createBrownNoise(context: AudioContext): AudioBuffer {
   return buffer;
 }
 
+function createWhiteNoise(context: AudioContext): AudioBuffer {
+  const length = context.sampleRate * NOISE_SECONDS;
+  const buffer = context.createBuffer(1, length, context.sampleRate);
+  const samples = buffer.getChannelData(0);
+  for (let index = 0; index < length; index += 1) {
+    samples[index] = Math.random() * 2 - 1;
+  }
+  return buffer;
+}
+
 function createEngine(): SoundEngine {
   const context = new AudioContext();
-  const noise = createBrownNoise(context);
+  const brownNoise = createBrownNoise(context);
+  const whiteNoise = createWhiteNoise(context);
   const listeners = new Set<() => void>();
   let muted = false;
 
@@ -54,10 +67,11 @@ function createEngine(): SoundEngine {
   master.connect(context.destination);
 
   const windSource = context.createBufferSource();
-  windSource.buffer = noise;
+  windSource.buffer = whiteNoise;
   windSource.loop = true;
   const windFilter = context.createBiquadFilter();
-  windFilter.type = "lowpass";
+  windFilter.type = "bandpass";
+  windFilter.Q.value = WIND_FILTER_Q;
   windFilter.frequency.value = WIND_FILTER_BASE_HZ;
   const windGain = context.createGain();
   windGain.gain.value = 0;
@@ -130,10 +144,11 @@ function createEngine(): SoundEngine {
       if (!isEnabled()) return;
       const { gain, stopAt } = envelope(RUMBLE_PEAK_GAIN, RUMBLE_DECAY_SECONDS, RUMBLE_ATTACK_SECONDS);
       const filter = context.createBiquadFilter();
-      filter.type = "lowpass";
+      filter.type = "bandpass";
+      filter.Q.value = RUMBLE_FILTER_Q;
       filter.frequency.value = RUMBLE_FILTER_HZ;
       const source = context.createBufferSource();
-      source.buffer = noise;
+      source.buffer = brownNoise;
       source.connect(filter).connect(gain);
       source.start();
       source.stop(stopAt);
