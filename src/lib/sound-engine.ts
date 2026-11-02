@@ -86,7 +86,9 @@ function createEngine(): SoundEngine {
     void context.resume().then(notify);
   };
 
-  const unlock = () => {
+  // The toggle enables sound itself; unlocking here too would let its own click mute it again.
+  const unlock = (event: Event) => {
+    if (event.target instanceof Element && event.target.closest("[data-sound-toggle]")) return;
     UNLOCK_EVENTS.forEach((type) => window.removeEventListener(type, unlock));
     if (context.state !== "running") enable();
   };

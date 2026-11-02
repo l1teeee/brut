@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { gsap } from "@/lib/gsap";
+import { subscribeScrollSpeed } from "@/lib/scroll-speed";
 import { getSoundEngine } from "@/lib/sound-engine";
 
 const SCROLL_FULL_SPEED = 2500;
@@ -9,15 +9,9 @@ const SCROLL_FULL_SPEED = 2500;
 export default function ScrollSound() {
   useEffect(() => {
     const sound = getSoundEngine();
-    let lastY = window.scrollY;
-    const onTick = (_time: number, deltaTime: number) => {
-      const speed = Math.abs(window.scrollY - lastY) / (deltaTime / 1000);
-      lastY = window.scrollY;
-      sound.setScrollIntensity(speed / SCROLL_FULL_SPEED);
-    };
-    gsap.ticker.add(onTick);
+    const unsubscribe = subscribeScrollSpeed((speed) => sound.setScrollIntensity(speed / SCROLL_FULL_SPEED));
     return () => {
-      gsap.ticker.remove(onTick);
+      unsubscribe();
       sound.setScrollIntensity(0);
     };
   }, []);

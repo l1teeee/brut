@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { startBouncingWords } from "@/lib/bouncing-words";
 import { gsap, useGSAP } from "@/lib/gsap";
+import { subscribeScrollSpeed } from "@/lib/scroll-speed";
 import { getSoundEngine } from "@/lib/sound-engine";
 
 const JAR_FIRST = 1;
@@ -18,8 +19,8 @@ const WHEEL_KEYS: readonly string[] = ["hundreds", "tens", "ones"];
 // Share of each step during which the wheels roll; the rest of the time they rest on a whole digit.
 const ROLL_SHARE = 0.25;
 
-const HEAT_START_RATE = 20;
-const HEAT_FULL_RATE = 90;
+const HEAT_START_SPEED = 600;
+const HEAT_FULL_SPEED = 3000;
 const HEAT_RISE_SECONDS = 0.5;
 const HEAT_HOLD_SECONDS = 2;
 const HEAT_COOL_SECONDS = 1;
@@ -110,9 +111,7 @@ export default function CounterSection() {
           .pause();
 
         const progress = { value: JAR_FIRST };
-        let lastValue = JAR_FIRST;
         let lastWhole = JAR_FIRST;
-        let lastTime = performance.now();
 
         const onProgress = () => {
           renderWheels(progress.value);
@@ -121,21 +120,11 @@ export default function CounterSection() {
             lastWhole = whole;
             getSoundEngine().playTick(JAR_TICK_BASE_HZ + whole * JAR_TICK_STEP_HZ);
           }
-          const now = performance.now();
-          const elapsedSeconds = (now - lastTime) / 1000;
-          if (elapsedSeconds > 0) {
-            const rate = Math.abs(progress.value - lastValue) / elapsedSeconds;
-            const target = clampHeat((rate - HEAT_START_RATE) / (HEAT_FULL_RATE - HEAT_START_RATE));
-            if (target > heat.value) heatTo(target, HEAT_RISE_SECONDS);
-          }
-          lastValue = progress.value;
-          lastTime = now;
-          coolTimer.restart(true);
         };
 
         renderWheels(JAR_FIRST);
 
-        gsap
+        const timeline = gsap
           .timeline({
             scrollTrigger: {
               trigger: rootRef.current,
@@ -167,6 +156,14 @@ export default function CounterSection() {
             2.2,
           );
 
+        const stopHeat = subscribeScrollSpeed((speed) => {
+          if (!timeline.scrollTrigger?.isActive) return;
+          const target = clampHeat((speed - HEAT_START_SPEED) / (HEAT_FULL_SPEED - HEAT_START_SPEED));
+          if (target <= 0) return;
+          if (target > heat.value) heatTo(target, HEAT_RISE_SECONDS);
+          coolTimer.restart(true);
+        });
+
         const stopBouncing = startBouncingWords({
           container: fruitsEl,
           words: gsap.utils.toArray<HTMLElement>("[data-fruit]", fruitsEl),
@@ -177,6 +174,7 @@ export default function CounterSection() {
 
         return () => {
           stopBouncing();
+          stopHeat();
           coolTimer.kill();
           digitsEl.style.removeProperty("--heat");
         };

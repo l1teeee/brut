@@ -12,6 +12,7 @@ export default function SoundToggle() {
   return (
     <button
       type="button"
+      data-sound-toggle
       aria-pressed={enabled}
       onClick={() => getSoundEngine().toggle()}
       className="fixed right-6 top-6 z-50 text-sm font-medium lowercase tracking-tight text-white mix-blend-difference"
