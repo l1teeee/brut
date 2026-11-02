@@ -23,24 +23,25 @@ const COUNTER_CLASSES =
   "text-[length:clamp(3.5rem,13vw,11rem)] [--heat:0] " +
   "text-[color:color-mix(in_oklab,var(--color-cherry)_calc(var(--heat)*100%),var(--color-charcoal))]";
 
-type Tone = "mist" | "charcoal";
+type Tone = "lime" | "blueberry" | "pink";
 
 const TONE_CLASS: Record<Tone, string> = {
-  mist: "text-mist",
-  charcoal: "text-charcoal",
+  lime: "text-lime",
+  blueberry: "text-blueberry",
+  pink: "text-pink",
 };
 
 type FruitWord = { text: string; tone: Tone; x: number; y: number };
 
 const FRUIT_WORDS: readonly FruitWord[] = [
-  { text: "Pear", tone: "mist", x: 8, y: 18 },
-  { text: "Plum", tone: "charcoal", x: 78, y: 14 },
-  { text: "Fig", tone: "mist", x: 14, y: 72 },
-  { text: "Cherry", tone: "charcoal", x: 70, y: 76 },
-  { text: "Lime", tone: "mist", x: 84, y: 46 },
-  { text: "Berry", tone: "charcoal", x: 4, y: 46 },
-  { text: "Pear", tone: "charcoal", x: 42, y: 86 },
-  { text: "Plum", tone: "mist", x: 46, y: 8 },
+  { text: "Pear", tone: "lime", x: 8, y: 18 },
+  { text: "Plum", tone: "blueberry", x: 78, y: 14 },
+  { text: "Fig", tone: "pink", x: 14, y: 72 },
+  { text: "Cherry", tone: "pink", x: 70, y: 76 },
+  { text: "Lime", tone: "lime", x: 84, y: 46 },
+  { text: "Berry", tone: "blueberry", x: 4, y: 46 },
+  { text: "Pear", tone: "lime", x: 42, y: 86 },
+  { text: "Plum", tone: "pink", x: 46, y: 8 },
 ];
 
 function rollFraction(value: number): number {
@@ -128,6 +129,7 @@ export default function CounterSection() {
             { autoAlpha: 0, yPercent: -30, duration: 0.3, ease: "power2.in" },
             2,
           )
+          .fromTo("[data-party-bg]", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: "power2.inOut" }, 2)
           .fromTo(
             "[data-headline]",
             { autoAlpha: 0, yPercent: 30 },
@@ -156,8 +158,9 @@ export default function CounterSection() {
       <h2 id="party-title" className="sr-only">
         Fruit party
       </h2>
+      <div data-party-bg aria-hidden="true" className="absolute inset-0 bg-vanilla" />
 
-      <p className="absolute bottom-6 left-6 z-20 text-sm font-medium text-charcoal">brut 2026</p>
+      <p className="absolute bottom-6 left-6 z-20 text-sm font-medium text-blueberry">brut 2026</p>
 
       <div
         data-counter-wrap
@@ -184,10 +187,10 @@ export default function CounterSection() {
         data-headline
         className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center"
       >
-        <p className="font-bold uppercase leading-[0.9] tracking-tight text-charcoal text-[clamp(3rem,11vw,9.5rem)]">
+        <p className="font-bold uppercase leading-[0.9] tracking-tight text-blueberry text-[clamp(3rem,11vw,9.5rem)]">
           Fruit party
         </p>
-        <p className="mt-2 font-medium lowercase tracking-tight text-charcoal/70 text-[clamp(1.5rem,4vw,3.5rem)]">
+        <p className="mt-2 font-medium lowercase tracking-tight text-pink text-[clamp(1.5rem,4vw,3.5rem)]">
           on sunday
         </p>
       </div>
