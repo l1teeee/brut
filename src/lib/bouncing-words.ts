@@ -8,8 +8,8 @@ const THROW_SMOOTHING = 0.3;
 type BouncingWordsOptions = {
   container: HTMLElement;
   words: HTMLElement[];
-  obstacle: HTMLElement;
-  isObstacleActive: () => boolean;
+  obstacles: HTMLElement[];
+  areObstaclesActive: () => boolean;
   onCrash: () => void;
 };
 
@@ -62,7 +62,7 @@ function createWord(el: HTMLElement): Word {
 }
 
 export function startBouncingWords(options: BouncingWordsOptions): () => void {
-  const { container, words, obstacle, isObstacleActive, onCrash } = options;
+  const { container, words, obstacles, areObstaclesActive, onCrash } = options;
   const state = words.map(createWord);
 
   const pointInContainer = (event: PointerEvent) => {
@@ -114,11 +114,11 @@ export function startBouncingWords(options: BouncingWordsOptions): () => void {
   const tick = (_time: number, deltaTime: number) => {
     const dtSeconds = Math.min(MAX_STEP_SECONDS, deltaTime / 1000);
     const bounds: Rect = { left: 0, top: 0, width: container.clientWidth, height: container.clientHeight };
-    const obstacleRect = isObstacleActive() ? rectInside(obstacle, container) : null;
+    const obstacleRects = areObstaclesActive() ? obstacles.map((obstacle) => rectInside(obstacle, container)) : [];
     state.forEach((word) => {
       word.body.width = word.el.offsetWidth;
       word.body.height = word.el.offsetHeight;
-      if (!word.dragging && stepBody(word.body, dtSeconds, bounds, obstacleRect)) onCrash();
+      if (!word.dragging && stepBody(word.body, dtSeconds, bounds, obstacleRects)) onCrash();
       word.setX(word.body.x - word.baseX);
       word.setY(word.body.y - word.baseY);
     });

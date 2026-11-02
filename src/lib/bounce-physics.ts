@@ -9,8 +9,8 @@ export type Body = {
   height: number;
 };
 
-const CRUISE_SPEED = 90;
-const SPEED_DAMPING_PER_SECOND = 1.5;
+const CRUISE_SPEED = 55;
+const SPEED_DAMPING_PER_SECOND = 1;
 
 export function randomVelocity(): { vx: number; vy: number } {
   const angle = Math.random() * Math.PI * 2;
@@ -66,11 +66,15 @@ function bounceOffObstacle(body: Body, obstacle: Rect): boolean {
   return true;
 }
 
-// Advances one body and returns true when it crashed into the obstacle during this step.
-export function stepBody(body: Body, dtSeconds: number, bounds: Rect, obstacle: Rect | null): boolean {
+// Advances one body and returns true when it crashed into any obstacle during this step.
+export function stepBody(body: Body, dtSeconds: number, bounds: Rect, obstacles: readonly Rect[]): boolean {
   settleSpeed(body, dtSeconds);
   body.x += body.vx * dtSeconds;
   body.y += body.vy * dtSeconds;
   bounceOffBounds(body, bounds);
-  return obstacle ? bounceOffObstacle(body, obstacle) : false;
+  let crashed = false;
+  obstacles.forEach((obstacle) => {
+    if (bounceOffObstacle(body, obstacle)) crashed = true;
+  });
+  return crashed;
 }

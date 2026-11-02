@@ -34,6 +34,13 @@ const DIGITS_CLASSES =
   "text-[color:color-mix(in_oklab,var(--color-brake)_calc(var(--heat)*100%),var(--color-charcoal))] " +
   "[text-shadow:0_0_calc(var(--heat)*28px)_color-mix(in_oklab,var(--color-brake)_calc(var(--heat)*55%),transparent)]";
 
+const TITLE_TEXT = "Fruit party";
+const LETTER_NOTES: readonly number[] = [523, 587, 659, 784, 880, 1047];
+const LETTER_HOVER_TONES: readonly string[] = ["pink", "lime"];
+const LETTER_CLASSES =
+  "pointer-events-auto inline-block transition-colors duration-500 " +
+  "data-[tone=pink]:text-pink data-[tone=lime]:text-lime";
+
 type Tone = "lime" | "blueberry" | "pink";
 
 const TONE_CLASS: Record<Tone, string> = {
@@ -79,6 +86,7 @@ export default function CounterSection() {
   const counterRef = useRef<HTMLParagraphElement>(null);
   const digitsRef = useRef<HTMLSpanElement>(null);
   const titleRef = useRef<HTMLParagraphElement>(null);
+  const sundayRef = useRef<HTMLParagraphElement>(null);
   const fruitsRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
@@ -88,9 +96,10 @@ export default function CounterSection() {
         const counterEl = counterRef.current;
         const digitsEl = digitsRef.current;
         const titleEl = titleRef.current;
+        const sundayEl = sundayRef.current;
         const fruitsEl = fruitsRef.current;
         const headlineEl = rootRef.current?.querySelector<HTMLElement>("[data-headline]");
-        if (!counterEl || !digitsEl || !titleEl || !fruitsEl || !headlineEl) return;
+        if (!counterEl || !digitsEl || !titleEl || !sundayEl || !fruitsEl || !headlineEl) return;
 
         const wheels = gsap.utils.toArray<HTMLElement>("[data-wheel]", counterEl);
         const setWheelY = wheels.map((wheel) => gsap.quickSetter(wheel, "yPercent"));
@@ -167,8 +176,8 @@ export default function CounterSection() {
         const stopBouncing = startBouncingWords({
           container: fruitsEl,
           words: gsap.utils.toArray<HTMLElement>("[data-fruit]", fruitsEl),
-          obstacle: titleEl,
-          isObstacleActive: () => Number(gsap.getProperty(headlineEl, "autoAlpha")) > 0.5,
+          obstacles: [titleEl, sundayEl],
+          areObstaclesActive: () => Number(gsap.getProperty(headlineEl, "autoAlpha")) > 0.5,
           onCrash: () => getSoundEngine().playTick(CRASH_TICK_HZ),
         });
 
@@ -222,11 +231,32 @@ export default function CounterSection() {
       >
         <p
           ref={titleRef}
+          aria-label={TITLE_TEXT}
           className="font-bold uppercase leading-[0.9] tracking-tight text-blueberry text-[clamp(3rem,11vw,9.5rem)]"
         >
-          Fruit party
+          {TITLE_TEXT.split("").map((letter, index) =>
+            letter === " " ? (
+              " "
+            ) : (
+              <span
+                key={index}
+                aria-hidden="true"
+                className={LETTER_CLASSES}
+                onPointerEnter={(event) => {
+                  event.currentTarget.dataset.tone =
+                    LETTER_HOVER_TONES[Math.floor(Math.random() * LETTER_HOVER_TONES.length)];
+                  getSoundEngine().playNote(LETTER_NOTES[index % LETTER_NOTES.length]);
+                }}
+                onPointerLeave={(event) => {
+                  delete event.currentTarget.dataset.tone;
+                }}
+              >
+                {letter}
+              </span>
+            ),
+          )}
         </p>
-        <p className="mt-2 font-medium lowercase tracking-tight text-pink text-[clamp(1.5rem,4vw,3.5rem)]">
+        <p ref={sundayRef} className="mt-2 font-medium lowercase tracking-tight text-pink text-[clamp(1.5rem,4vw,3.5rem)]">
           on sunday
         </p>
       </div>
