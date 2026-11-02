@@ -78,3 +78,9 @@ export function stepBody(body: Body, dtSeconds: number, bounds: Rect, obstacles:
   });
   return crashed;
 }
+
+// Keeps a dragged body inside the bounds and outside every obstacle without moving it on its own.
+export function constrainBody(body: Body, bounds: Rect, obstacles: readonly Rect[]): void {
+  bounceOffBounds(body, bounds);
+  obstacles.forEach((obstacle) => bounceOffObstacle(body, obstacle));
+}

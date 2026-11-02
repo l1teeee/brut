@@ -1,5 +1,5 @@
 import { gsap } from "@/lib/gsap";
-import { randomVelocity, stepBody, type Body, type Rect } from "@/lib/bounce-physics";
+import { constrainBody, randomVelocity, stepBody, type Body, type Rect } from "@/lib/bounce-physics";
 
 const MAX_THROW_SPEED = 900;
 const MAX_STEP_SECONDS = 0.05;
@@ -118,7 +118,11 @@ export function startBouncingWords(options: BouncingWordsOptions): () => void {
     state.forEach((word) => {
       word.body.width = word.el.offsetWidth;
       word.body.height = word.el.offsetHeight;
-      if (!word.dragging && stepBody(word.body, dtSeconds, bounds, obstacleRects)) onCrash();
+      if (word.dragging) {
+        constrainBody(word.body, bounds, obstacleRects);
+      } else if (stepBody(word.body, dtSeconds, bounds, obstacleRects)) {
+        onCrash();
+      }
       word.setX(word.body.x - word.baseX);
       word.setY(word.body.y - word.baseY);
     });
