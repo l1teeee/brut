@@ -4,7 +4,9 @@ import CounterSection from "@/components/sections/CounterSection";
 import OrchardSection from "@/components/sections/OrchardSection";
 import SignsSection from "@/components/sections/SignsSection";
 import ScrollIndicator from "@/components/ScrollIndicator";
+import ScrollSound from "@/components/ScrollSound";
 import SmoothScroll from "@/components/SmoothScroll";
+import SoundToggle from "@/components/SoundToggle";
 
 export default function Home() {
   return (
@@ -18,6 +20,8 @@ export default function Home() {
         </main>
       </SmoothScroll>
       <GrainOverlay />
+      <ScrollSound />
+      <SoundToggle />
       <ScrollIndicator />
     </>
   );

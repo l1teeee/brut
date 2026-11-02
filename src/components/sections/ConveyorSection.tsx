@@ -2,6 +2,10 @@
 
 import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
+import { getSoundEngine } from "@/lib/sound-engine";
+
+const BELT_TICKS = 32;
+const BELT_TICK_HZ = 900;
 
 type Tone = "cherry" | "forest";
 
@@ -49,6 +53,7 @@ export default function ConveyorSection() {
     () => {
       const media = gsap.matchMedia();
       media.add("(prefers-reduced-motion: no-preference)", () => {
+        let lastSlot = 0;
         const timeline = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
@@ -56,6 +61,13 @@ export default function ConveyorSection() {
             end: "+=300%",
             pin: true,
             scrub: 1.2,
+            onUpdate: (self) => {
+              const slot = Math.floor(self.progress * BELT_TICKS);
+              if (slot !== lastSlot) {
+                lastSlot = slot;
+                getSoundEngine().playTick(BELT_TICK_HZ);
+              }
+            },
           },
         });
         BELTS.forEach((belt, index) => {

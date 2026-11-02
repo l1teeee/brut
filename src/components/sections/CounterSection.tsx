@@ -2,9 +2,13 @@
 
 import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
+import { getSoundEngine } from "@/lib/sound-engine";
 
 const JAR_FIRST = 1;
 const JAR_LAST = 96;
+const JAR_TICK_BASE_HZ = 400;
+const JAR_TICK_STEP_HZ = 6;
+const REVEAL_CHORD: readonly number[] = [523, 659, 784];
 
 const DIGIT_CELLS: readonly number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
 const WHEEL_KEYS: readonly string[] = ["hundreds", "tens", "ones"];
@@ -94,10 +98,16 @@ export default function CounterSection() {
 
         const progress = { value: JAR_FIRST };
         let lastValue = JAR_FIRST;
+        let lastWhole = JAR_FIRST;
         let lastTime = performance.now();
 
         const onProgress = () => {
           renderWheels(progress.value);
+          const whole = Math.floor(progress.value);
+          if (whole !== lastWhole) {
+            lastWhole = whole;
+            getSoundEngine().playTick(JAR_TICK_BASE_HZ + whole * JAR_TICK_STEP_HZ);
+          }
           const now = performance.now();
           const elapsedSeconds = (now - lastTime) / 1000;
           if (elapsedSeconds > 0) {
@@ -136,6 +146,7 @@ export default function CounterSection() {
             { autoAlpha: 1, yPercent: 0, duration: 0.3, ease: "power2.out" },
             2.1,
           )
+          .call(() => getSoundEngine().playChord(REVEAL_CHORD), [], 2.1)
           .fromTo(
             "[data-fruit]",
             { autoAlpha: 0, scale: 0 },

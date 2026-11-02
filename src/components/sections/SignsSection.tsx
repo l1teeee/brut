@@ -2,8 +2,10 @@
 
 import { useRef } from "react";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { getSoundEngine } from "@/lib/sound-engine";
 
 const COLOR_STEPS = 7;
+const STEP_NOTES: readonly number[] = [262, 294, 330, 392, 440, 523, 587];
 
 const COLOR_TRANSITION = "transition-colors duration-700 ease-out";
 
@@ -48,7 +50,10 @@ export default function SignsSection() {
           pin: true,
           onUpdate: (self) => {
             const step = Math.min(COLOR_STEPS - 1, Math.floor(self.progress * COLOR_STEPS));
-            root.dataset.step = String(step);
+            if (String(step) !== root.dataset.step) {
+              root.dataset.step = String(step);
+              getSoundEngine().playNote(STEP_NOTES[step]);
+            }
           },
         });
 
