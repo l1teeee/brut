@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { startBouncingWords } from "@/lib/bouncing-words";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { getSoundEngine } from "@/lib/sound-engine";
 
@@ -8,6 +9,7 @@ const JAR_FIRST = 1;
 const JAR_LAST = 96;
 const JAR_TICK_BASE_HZ = 400;
 const JAR_TICK_STEP_HZ = 6;
+const CRASH_TICK_HZ = 220;
 const REVEAL_CHORD: readonly number[] = [523, 659, 784];
 
 const DIGIT_CELLS: readonly number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
@@ -75,6 +77,8 @@ export default function CounterSection() {
   const rootRef = useRef<HTMLElement>(null);
   const counterRef = useRef<HTMLParagraphElement>(null);
   const digitsRef = useRef<HTMLSpanElement>(null);
+  const titleRef = useRef<HTMLParagraphElement>(null);
+  const fruitsRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
@@ -82,7 +86,10 @@ export default function CounterSection() {
       media.add("(prefers-reduced-motion: no-preference)", () => {
         const counterEl = counterRef.current;
         const digitsEl = digitsRef.current;
-        if (!counterEl || !digitsEl) return;
+        const titleEl = titleRef.current;
+        const fruitsEl = fruitsRef.current;
+        const headlineEl = rootRef.current?.querySelector<HTMLElement>("[data-headline]");
+        if (!counterEl || !digitsEl || !titleEl || !fruitsEl || !headlineEl) return;
 
         const wheels = gsap.utils.toArray<HTMLElement>("[data-wheel]", counterEl);
         const setWheelY = wheels.map((wheel) => gsap.quickSetter(wheel, "yPercent"));
@@ -160,7 +167,16 @@ export default function CounterSection() {
             2.2,
           );
 
+        const stopBouncing = startBouncingWords({
+          container: fruitsEl,
+          words: gsap.utils.toArray<HTMLElement>("[data-fruit]", fruitsEl),
+          obstacle: titleEl,
+          isObstacleActive: () => Number(gsap.getProperty(headlineEl, "autoAlpha")) > 0.5,
+          onCrash: () => getSoundEngine().playTick(CRASH_TICK_HZ),
+        });
+
         return () => {
+          stopBouncing();
           coolTimer.kill();
           digitsEl.style.removeProperty("--heat");
         };
@@ -204,9 +220,12 @@ export default function CounterSection() {
 
       <div
         data-headline
-        className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center"
+        className="pointer-events-none absolute inset-0 z-10 flex flex-col items-center justify-center text-center"
       >
-        <p className="font-bold uppercase leading-[0.9] tracking-tight text-blueberry text-[clamp(3rem,11vw,9.5rem)]">
+        <p
+          ref={titleRef}
+          className="font-bold uppercase leading-[0.9] tracking-tight text-blueberry text-[clamp(3rem,11vw,9.5rem)]"
+        >
           Fruit party
         </p>
         <p className="mt-2 font-medium lowercase tracking-tight text-pink text-[clamp(1.5rem,4vw,3.5rem)]">
@@ -214,12 +233,12 @@ export default function CounterSection() {
         </p>
       </div>
 
-      <div aria-hidden="true" className="absolute inset-0">
+      <div ref={fruitsRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-20">
         {FRUIT_WORDS.map((item) => (
           <span
             key={`${item.text}-${item.x}-${item.y}`}
             data-fruit
-            className={`absolute font-sans font-bold uppercase leading-none tracking-tight text-[clamp(1.5rem,4vw,3.5rem)] ${TONE_CLASS[item.tone]}`}
+            className={`pointer-events-auto cursor-grab touch-none select-none active:cursor-grabbing absolute font-sans font-bold uppercase leading-none tracking-tight text-[clamp(1.5rem,4vw,3.5rem)] ${TONE_CLASS[item.tone]}`}
             style={{ left: `${item.x}%`, top: `${item.y}%` }}
           >
             {item.text}
