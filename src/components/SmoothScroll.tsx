@@ -13,7 +13,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       const smoother = ScrollSmoother.create({
         wrapper: wrapperRef.current,
         content: contentRef.current,
-        smooth: 1.2,
+        smooth: 2,
         smoothTouch: 0.1,
         effects: false,
       });

@@ -18,9 +18,9 @@ export default function SignsSection() {
           scrollTrigger: {
             trigger: rootRef.current,
             start: "top top",
-            end: "+=200%",
+            end: "+=300%",
             pin: true,
-            scrub: 0.6,
+            scrub: 1.2,
           },
         });
 
