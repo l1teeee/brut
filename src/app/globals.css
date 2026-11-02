@@ -30,27 +30,10 @@ body {
   font-family: var(--font-sans);
 }
 
-@supports (-moz-appearance: none) {
-  html {
-    scrollbar-width: thin;
-    scrollbar-color: rgb(128 128 128 / 0.35) transparent;
-  }
+html {
+  scrollbar-width: none;
 }
 
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgb(128 128 128 / 0.35);
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-button {
   display: none;
 }
