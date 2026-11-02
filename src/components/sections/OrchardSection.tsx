@@ -218,7 +218,7 @@ export default function OrchardSection() {
           data-pear
           className={`text-white text-[clamp(4rem,14vw,12rem)] ${WORD_CLASSES}`}
         >
-          <span className={STORM_HOVER_CLASSES}>Pear</span>
+          Pear
         </p>
       </div>
       <div data-hint aria-hidden="true" className="absolute inset-x-0 bottom-8 z-20 flex justify-center">
