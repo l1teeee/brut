@@ -1,13 +1,31 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 
 const JAR_FIRST = 1;
 const JAR_LAST = 96;
 
-function formatJar(value: number): string {
-  return `Jar-${String(Math.round(value)).padStart(3, "0")}`;
+const DIGIT_CELLS: readonly number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
+const WHEEL_KEYS: readonly string[] = ["hundreds", "tens", "ones"];
+
+const HEAT_FULL_VELOCITY = 3000;
+const HEAT_RISE_SECONDS = 0.6;
+const HEAT_COOL_SECONDS = 1.2;
+
+const COUNTER_CLASSES =
+  "flex font-sans font-bold uppercase leading-none tracking-tight tabular-nums " +
+  "text-[length:clamp(3.5rem,13vw,11rem)] [--heat:0] " +
+  "text-[color:color-mix(in_oklab,var(--color-cherry)_calc(var(--heat)*100%),var(--color-blueberry))]";
+
+// Odometer rule: a wheel turns only while every wheel to its right rolls from 9 to 0.
+function wheelPositions(value: number): number[] {
+  const ones = value % 10;
+  const carry = Math.max(0, ones - 9);
+  const tensIndex = Math.floor(value / 10) % 10;
+  const tens = tensIndex + carry;
+  const hundreds = (Math.floor(value / 100) % 10) + (tensIndex === 9 ? carry : 0);
+  return [hundreds, tens, ones];
 }
 
 type Tone = "lime" | "blueberry" | "pink";
@@ -41,9 +59,25 @@ export default function CounterSection() {
       media.add("(prefers-reduced-motion: no-preference)", () => {
         const counterEl = counterRef.current;
         if (!counterEl) return;
-        counterEl.textContent = formatJar(JAR_FIRST);
+
+        const wheels = gsap.utils.toArray<HTMLElement>("[data-wheel]", counterEl);
+        const setWheelY = wheels.map((wheel) => gsap.quickSetter(wheel, "yPercent"));
+        const renderWheels = (value: number) => {
+          wheelPositions(value).forEach((position, index) => {
+            setWheelY[index](-(position / DIGIT_CELLS.length) * 100);
+          });
+        };
+
+        const heat = { value: 0 };
+        const clampHeat = gsap.utils.clamp(0, 1);
+        const renderHeat = () => counterEl.style.setProperty("--heat", String(heat.value));
+        const heatTo = (target: number, duration: number) => {
+          gsap.to(heat, { value: target, duration, ease: "power2.out", overwrite: true, onUpdate: renderHeat });
+        };
+        const coolDown = () => heatTo(0, HEAT_COOL_SECONDS);
 
         const progress = { value: JAR_FIRST };
+        renderWheels(JAR_FIRST);
 
         gsap
           .timeline({
@@ -53,18 +87,15 @@ export default function CounterSection() {
               end: "+=375%",
               pin: true,
               scrub: 1.2,
+              onUpdate: (self) => {
+                const target = clampHeat(Math.abs(self.getVelocity()) / HEAT_FULL_VELOCITY);
+                heatTo(target, target > heat.value ? HEAT_RISE_SECONDS : HEAT_COOL_SECONDS);
+              },
             },
           })
           .to(
             progress,
-            {
-              value: JAR_LAST,
-              duration: 2,
-              ease: "none",
-              onUpdate: () => {
-                counterEl.textContent = formatJar(progress.value);
-              },
-            },
+            { value: JAR_LAST, duration: 2, ease: "none", onUpdate: () => renderWheels(progress.value) },
             0,
           )
           .fromTo(
@@ -82,18 +113,14 @@ export default function CounterSection() {
           .fromTo(
             "[data-fruit]",
             { autoAlpha: 0, scale: 0 },
-            {
-              autoAlpha: 1,
-              scale: 1,
-              duration: 0.3,
-              ease: "back.out(2)",
-              stagger: 0.04,
-            },
+            { autoAlpha: 1, scale: 1, duration: 0.3, ease: "back.out(2)", stagger: 0.04 },
             2.2,
           );
 
+        ScrollTrigger.addEventListener("scrollEnd", coolDown);
         return () => {
-          counterEl.textContent = formatJar(JAR_LAST);
+          ScrollTrigger.removeEventListener("scrollEnd", coolDown);
+          counterEl.style.removeProperty("--heat");
         };
       });
       return () => media.revert();
@@ -118,11 +145,19 @@ export default function CounterSection() {
         className="invisible absolute inset-0 flex flex-col items-center justify-center gap-3"
       >
         <p className="text-sm font-medium lowercase tracking-tight text-pink">now filling</p>
-        <p
-          ref={counterRef}
-          className="font-sans font-bold uppercase leading-none tracking-tight tabular-nums text-blueberry text-[clamp(3.5rem,13vw,11rem)]"
-        >
-          {formatJar(JAR_LAST)}
+        <p ref={counterRef} aria-hidden="true" className={COUNTER_CLASSES}>
+          <span>Jar-</span>
+          {WHEEL_KEYS.map((key) => (
+            <span key={key} className="inline-block h-[1em] overflow-hidden">
+              <span data-wheel className="flex flex-col will-change-transform">
+                {DIGIT_CELLS.map((digit, index) => (
+                  <span key={index} className="h-[1em]">
+                    {digit}
+                  </span>
+                ))}
+              </span>
+            </span>
+          ))}
         </p>
       </div>
 
