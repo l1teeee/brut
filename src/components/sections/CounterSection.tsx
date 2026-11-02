@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { gsap, useGSAP } from "@/lib/gsap";
 
 const JAR_FIRST = 1;
 const JAR_LAST = 96;
@@ -9,45 +9,58 @@ const JAR_LAST = 96;
 const DIGIT_CELLS: readonly number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
 const WHEEL_KEYS: readonly string[] = ["hundreds", "tens", "ones"];
 
-const HEAT_FULL_VELOCITY = 3000;
-const HEAT_RISE_SECONDS = 0.6;
-const HEAT_COOL_SECONDS = 1.2;
+// Share of each step during which the wheels roll; the rest of the time they rest on a whole digit.
+const ROLL_SHARE = 0.25;
+
+const HEAT_START_RATE = 20;
+const HEAT_FULL_RATE = 90;
+const HEAT_RISE_SECONDS = 0.5;
+const HEAT_HOLD_SECONDS = 0.5;
+const HEAT_COOL_SECONDS = 1.5;
 
 const COUNTER_CLASSES =
   "flex font-sans font-bold uppercase leading-none tracking-tight tabular-nums " +
   "text-[length:clamp(3.5rem,13vw,11rem)] [--heat:0] " +
-  "text-[color:color-mix(in_oklab,var(--color-cherry)_calc(var(--heat)*100%),var(--color-blueberry))]";
+  "text-[color:color-mix(in_oklab,var(--color-cherry)_calc(var(--heat)*100%),var(--color-charcoal))]";
 
-// Odometer rule: a wheel turns only while every wheel to its right rolls from 9 to 0.
-function wheelPositions(value: number): number[] {
-  const ones = value % 10;
-  const carry = Math.max(0, ones - 9);
-  const tensIndex = Math.floor(value / 10) % 10;
-  const tens = tensIndex + carry;
-  const hundreds = (Math.floor(value / 100) % 10) + (tensIndex === 9 ? carry : 0);
-  return [hundreds, tens, ones];
-}
-
-type Tone = "lime" | "blueberry" | "pink";
+type Tone = "mist" | "charcoal";
 
 const TONE_CLASS: Record<Tone, string> = {
-  lime: "text-lime",
-  blueberry: "text-blueberry",
-  pink: "text-pink",
+  mist: "text-mist",
+  charcoal: "text-charcoal",
 };
 
 type FruitWord = { text: string; tone: Tone; x: number; y: number };
 
-const FRUIT_WORDS: FruitWord[] = [
-  { text: "Pear", tone: "lime", x: 8, y: 18 },
-  { text: "Plum", tone: "blueberry", x: 78, y: 14 },
-  { text: "Fig", tone: "pink", x: 14, y: 72 },
-  { text: "Cherry", tone: "pink", x: 70, y: 76 },
-  { text: "Lime", tone: "lime", x: 84, y: 46 },
-  { text: "Berry", tone: "blueberry", x: 4, y: 46 },
-  { text: "Pear", tone: "lime", x: 42, y: 86 },
-  { text: "Plum", tone: "pink", x: 46, y: 8 },
+const FRUIT_WORDS: readonly FruitWord[] = [
+  { text: "Pear", tone: "mist", x: 8, y: 18 },
+  { text: "Plum", tone: "charcoal", x: 78, y: 14 },
+  { text: "Fig", tone: "mist", x: 14, y: 72 },
+  { text: "Cherry", tone: "charcoal", x: 70, y: 76 },
+  { text: "Lime", tone: "mist", x: 84, y: 46 },
+  { text: "Berry", tone: "charcoal", x: 4, y: 46 },
+  { text: "Pear", tone: "charcoal", x: 42, y: 86 },
+  { text: "Plum", tone: "mist", x: 46, y: 8 },
 ];
+
+function rollFraction(value: number): number {
+  const fraction = value - Math.floor(value);
+  const rollStart = 1 - ROLL_SHARE;
+  if (fraction <= rollStart) return 0;
+  const t = (fraction - rollStart) / ROLL_SHARE;
+  return t * t * (3 - 2 * t);
+}
+
+// Odometer rule: a wheel turns only while every wheel to its right rolls from 9 to 0.
+function wheelPositions(value: number): number[] {
+  const whole = Math.floor(value);
+  const roll = rollFraction(value);
+  const onesDigit = whole % 10;
+  const tensDigit = Math.floor(whole / 10) % 10;
+  const onesCarry = onesDigit === 9 ? roll : 0;
+  const tensCarry = tensDigit === 9 ? onesCarry : 0;
+  return [(Math.floor(whole / 100) % 10) + tensCarry, tensDigit + onesCarry, onesDigit + roll];
+}
 
 export default function CounterSection() {
   const rootRef = useRef<HTMLElement>(null);
@@ -74,9 +87,28 @@ export default function CounterSection() {
         const heatTo = (target: number, duration: number) => {
           gsap.to(heat, { value: target, duration, ease: "power2.out", overwrite: true, onUpdate: renderHeat });
         };
-        const coolDown = () => heatTo(0, HEAT_COOL_SECONDS);
+        const coolTimer = gsap
+          .delayedCall(HEAT_HOLD_SECONDS, () => heatTo(0, HEAT_COOL_SECONDS))
+          .pause();
 
         const progress = { value: JAR_FIRST };
+        let lastValue = JAR_FIRST;
+        let lastTime = performance.now();
+
+        const onProgress = () => {
+          renderWheels(progress.value);
+          const now = performance.now();
+          const elapsedSeconds = (now - lastTime) / 1000;
+          if (elapsedSeconds > 0) {
+            const rate = Math.abs(progress.value - lastValue) / elapsedSeconds;
+            const target = clampHeat((rate - HEAT_START_RATE) / (HEAT_FULL_RATE - HEAT_START_RATE));
+            if (target > heat.value) heatTo(target, HEAT_RISE_SECONDS);
+          }
+          lastValue = progress.value;
+          lastTime = now;
+          coolTimer.restart(true);
+        };
+
         renderWheels(JAR_FIRST);
 
         gsap
@@ -87,17 +119,9 @@ export default function CounterSection() {
               end: "+=375%",
               pin: true,
               scrub: 1.2,
-              onUpdate: (self) => {
-                const target = clampHeat(Math.abs(self.getVelocity()) / HEAT_FULL_VELOCITY);
-                heatTo(target, target > heat.value ? HEAT_RISE_SECONDS : HEAT_COOL_SECONDS);
-              },
             },
           })
-          .to(
-            progress,
-            { value: JAR_LAST, duration: 2, ease: "none", onUpdate: () => renderWheels(progress.value) },
-            0,
-          )
+          .to(progress, { value: JAR_LAST, duration: 2, ease: "none", onUpdate: onProgress }, 0)
           .fromTo(
             "[data-counter-wrap]",
             { autoAlpha: 1, yPercent: 0 },
@@ -117,9 +141,8 @@ export default function CounterSection() {
             2.2,
           );
 
-        ScrollTrigger.addEventListener("scrollEnd", coolDown);
         return () => {
-          ScrollTrigger.removeEventListener("scrollEnd", coolDown);
+          coolTimer.kill();
           counterEl.style.removeProperty("--heat");
         };
       });
@@ -129,23 +152,18 @@ export default function CounterSection() {
   );
 
   return (
-    <section
-      ref={rootRef}
-      aria-labelledby="party-title"
-      className="relative h-svh overflow-hidden bg-vanilla"
-    >
+    <section ref={rootRef} aria-labelledby="party-title" className="relative h-svh overflow-hidden bg-cream">
       <h2 id="party-title" className="sr-only">
         Fruit party
       </h2>
 
-
-      <p className="absolute bottom-6 left-6 z-20 text-sm font-medium text-blueberry">brut 2026</p>
+      <p className="absolute bottom-6 left-6 z-20 text-sm font-medium text-charcoal">brut 2026</p>
 
       <div
         data-counter-wrap
         className="invisible absolute inset-0 flex flex-col items-center justify-center gap-3"
       >
-        <p className="text-sm font-medium lowercase tracking-tight text-pink">now filling</p>
+        <p className="text-sm font-medium lowercase tracking-tight text-charcoal/70">now filling</p>
         <p ref={counterRef} aria-hidden="true" className={COUNTER_CLASSES}>
           <span>Jar-</span>
           {WHEEL_KEYS.map((key) => (
@@ -166,10 +184,10 @@ export default function CounterSection() {
         data-headline
         className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center"
       >
-        <p className="font-bold uppercase leading-[0.9] tracking-tight text-blueberry text-[clamp(3rem,11vw,9.5rem)]">
+        <p className="font-bold uppercase leading-[0.9] tracking-tight text-charcoal text-[clamp(3rem,11vw,9.5rem)]">
           Fruit party
         </p>
-        <p className="mt-2 font-medium lowercase tracking-tight text-pink text-[clamp(1.5rem,4vw,3.5rem)]">
+        <p className="mt-2 font-medium lowercase tracking-tight text-charcoal/70 text-[clamp(1.5rem,4vw,3.5rem)]">
           on sunday
         </p>
       </div>

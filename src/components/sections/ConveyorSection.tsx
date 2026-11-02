@@ -76,7 +76,7 @@ export default function ConveyorSection() {
     <section
       ref={rootRef}
       aria-labelledby="sorting-title"
-      className="relative h-svh overflow-hidden bg-vanilla"
+      className="relative h-svh overflow-hidden bg-cream"
     >
       <h2 id="sorting-title" className="sr-only">
         Sorting
