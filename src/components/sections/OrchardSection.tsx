@@ -10,15 +10,13 @@ type Layer = {
   word: string;
   containerClasses: string;
   classes: string;
-  puffClasses: string;
+  blurClasses: string;
   positions: readonly Position[];
 };
 
 const WORD_CLASSES = "font-sans font-bold uppercase leading-none tracking-tight";
-const CLOUD_CLASSES =
-  "relative isolate block text-white [text-shadow:0_2px_10px_rgb(120_180_220/0.55)] " +
-  "before:absolute before:left-1/2 before:top-1/2 before:-z-10 before:h-[260%] before:w-[170%] before:-translate-x-1/2 before:-translate-y-1/2 before:rounded-full before:bg-white/70 " +
-  "after:absolute after:left-[30%] after:top-[25%] after:-z-10 after:h-[200%] after:w-[90%] after:-translate-y-1/2 after:rounded-full after:bg-white/80";
+const CLOUD_TEXT_CLASSES =
+  "block text-white [text-shadow:0_0_6px_rgb(255_255_255/0.9),0_0_18px_rgb(255_255_255/0.7),0_0_36px_rgb(255_255_255/0.5)]";
 const MAX_SKEW_DEG = 20;
 const SKEW_VELOCITY_DIVISOR = -300;
 
@@ -28,7 +26,7 @@ const LAYERS: readonly Layer[] = [
     word: "Leaf",
     containerClasses: "opacity-50",
     classes: "text-[clamp(0.75rem,1.2vw,1rem)]",
-    puffClasses: "before:blur-xl after:blur-xl",
+    blurClasses: "blur-[1.5px]",
     positions: [
       [6, 14],
       [28, 22],
@@ -45,7 +43,7 @@ const LAYERS: readonly Layer[] = [
     word: "Leaf",
     containerClasses: "opacity-75",
     classes: "text-[clamp(1rem,1.8vw,1.5rem)]",
-    puffClasses: "before:blur-lg after:blur-lg",
+    blurClasses: "blur-[0.8px]",
     positions: [
       [12, 70],
       [34, 82],
@@ -62,7 +60,7 @@ const LAYERS: readonly Layer[] = [
     word: "Plum",
     containerClasses: "",
     classes: "text-[clamp(1.25rem,2.6vw,2.25rem)]",
-    puffClasses: "before:blur-md after:blur-md",
+    blurClasses: "blur-[0.3px]",
     positions: [
       [4, 36],
       [22, 58],
@@ -175,7 +173,7 @@ export default function OrchardSection() {
                 className="absolute"
                 style={{ left: `${x}vw`, top: `${y}%` }}
               >
-                <span data-float className={`${CLOUD_CLASSES} ${WORD_CLASSES} ${layer.classes} ${layer.puffClasses}`}>
+                <span data-float className={`${CLOUD_TEXT_CLASSES} ${WORD_CLASSES} ${layer.classes} ${layer.blurClasses}`}>
                   {layer.word}
                 </span>
               </span>
