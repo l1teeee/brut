@@ -31,8 +31,7 @@ const COUNTER_CLASSES =
 
 const DIGITS_CLASSES =
   "inline-flex [--heat:0] " +
-  "text-[color:color-mix(in_oklab,var(--color-brake)_calc(var(--heat)*100%),var(--color-charcoal))] " +
-  "[text-shadow:0_0_calc(var(--heat)*28px)_color-mix(in_oklab,var(--color-brake)_calc(var(--heat)*55%),transparent)]";
+  "text-[color:color-mix(in_oklab,var(--color-brake)_calc(var(--heat)*100%),var(--color-charcoal))]";
 
 const TITLE_TEXT = "Fruit party";
 const LETTER_NOTES: readonly number[] = [523, 587, 659, 784, 880, 1047];
