@@ -5,10 +5,8 @@
   --color-foreground: #4d3735;
   --font-sans: var(--font-inter-tight), Arial, sans-serif;
 
-  --color-honey: #f8d990;
-  --color-plum: #3f1d48;
-  --color-dusty-blue: #5d779e;
-  --color-sage: #b5b07b;
+  --color-sky-deep: #8ecbee;
+  --color-sky-soft: #c4e7f8;
 
   --color-vanilla: #f6eede;
   --color-apricot: #e5865f;
@@ -30,4 +28,29 @@ body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-sans);
+}
+
+@supports (-moz-appearance: none) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(128 128 128 / 0.35) transparent;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(128 128 128 / 0.35);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-button {
+  display: none;
 }
