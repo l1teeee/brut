@@ -19,13 +19,17 @@ const ROLL_SHARE = 0.25;
 const HEAT_START_RATE = 20;
 const HEAT_FULL_RATE = 90;
 const HEAT_RISE_SECONDS = 0.5;
-const HEAT_HOLD_SECONDS = 0.5;
-const HEAT_COOL_SECONDS = 1.5;
+const HEAT_HOLD_SECONDS = 2;
+const HEAT_COOL_SECONDS = 1;
 
 const COUNTER_CLASSES =
-  "flex font-sans font-bold uppercase leading-none tracking-tight tabular-nums " +
-  "text-[length:clamp(3.5rem,13vw,11rem)] [--heat:0] " +
-  "text-[color:color-mix(in_oklab,var(--color-cherry)_calc(var(--heat)*100%),var(--color-charcoal))]";
+  "flex font-sans font-bold uppercase leading-none tracking-tight tabular-nums text-charcoal " +
+  "text-[length:clamp(3.5rem,13vw,11rem)]";
+
+const DIGITS_CLASSES =
+  "inline-flex [--heat:0] " +
+  "text-[color:color-mix(in_oklab,var(--color-brake)_calc(var(--heat)*100%),var(--color-charcoal))] " +
+  "[text-shadow:0_0_calc(var(--heat)*28px)_color-mix(in_oklab,var(--color-brake)_calc(var(--heat)*55%),transparent)]";
 
 type Tone = "lime" | "blueberry" | "pink";
 
@@ -70,13 +74,15 @@ function wheelPositions(value: number): number[] {
 export default function CounterSection() {
   const rootRef = useRef<HTMLElement>(null);
   const counterRef = useRef<HTMLParagraphElement>(null);
+  const digitsRef = useRef<HTMLSpanElement>(null);
 
   useGSAP(
     () => {
       const media = gsap.matchMedia();
       media.add("(prefers-reduced-motion: no-preference)", () => {
         const counterEl = counterRef.current;
-        if (!counterEl) return;
+        const digitsEl = digitsRef.current;
+        if (!counterEl || !digitsEl) return;
 
         const wheels = gsap.utils.toArray<HTMLElement>("[data-wheel]", counterEl);
         const setWheelY = wheels.map((wheel) => gsap.quickSetter(wheel, "yPercent"));
@@ -88,7 +94,7 @@ export default function CounterSection() {
 
         const heat = { value: 0 };
         const clampHeat = gsap.utils.clamp(0, 1);
-        const renderHeat = () => counterEl.style.setProperty("--heat", String(heat.value));
+        const renderHeat = () => digitsEl.style.setProperty("--heat", String(heat.value));
         const heatTo = (target: number, duration: number) => {
           gsap.to(heat, { value: target, duration, ease: "power2.out", overwrite: true, onUpdate: renderHeat });
         };
@@ -156,7 +162,7 @@ export default function CounterSection() {
 
         return () => {
           coolTimer.kill();
-          counterEl.style.removeProperty("--heat");
+          digitsEl.style.removeProperty("--heat");
         };
       });
       return () => media.revert();
@@ -180,17 +186,19 @@ export default function CounterSection() {
         <p className="text-sm font-medium lowercase tracking-tight text-charcoal/70">now filling</p>
         <p ref={counterRef} aria-hidden="true" className={COUNTER_CLASSES}>
           <span>Jar-</span>
-          {WHEEL_KEYS.map((key) => (
-            <span key={key} className="inline-block h-[1em] overflow-hidden">
-              <span data-wheel className="flex flex-col will-change-transform">
-                {DIGIT_CELLS.map((digit, index) => (
-                  <span key={index} className="h-[1em]">
-                    {digit}
-                  </span>
-                ))}
+          <span ref={digitsRef} className={DIGITS_CLASSES}>
+            {WHEEL_KEYS.map((key) => (
+              <span key={key} className="inline-block h-[1em] overflow-hidden">
+                <span data-wheel className="flex flex-col will-change-transform">
+                  {DIGIT_CELLS.map((digit, index) => (
+                    <span key={index} className="h-[1em]">
+                      {digit}
+                    </span>
+                  ))}
+                </span>
               </span>
-            </span>
-          ))}
+            ))}
+          </span>
         </p>
       </div>
 
