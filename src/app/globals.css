@@ -21,6 +21,26 @@
   --color-blueberry: #3a4088;
   --color-lime: #cdcf31;
   --color-pink: #db5782;
+
+  --color-storm: #6b7685;
+
+  --animate-storm: storm-shake 0.18s linear infinite;
+
+  @keyframes storm-shake {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    25% {
+      transform: translate(-1.5px, 1px);
+    }
+    50% {
+      transform: translate(1.5px, -1px);
+    }
+    75% {
+      transform: translate(-1px, -1px);
+    }
+  }
 }
 
 body {
