@@ -132,11 +132,12 @@ export default function CounterSection() {
     <section
       ref={rootRef}
       aria-labelledby="party-title"
-      className="relative h-svh overflow-hidden bg-vanilla"
+      className="relative h-svh overflow-hidden bg-purple"
     >
       <h2 id="party-title" className="sr-only">
         Fruit party
       </h2>
+      <div aria-hidden="true" className="absolute inset-0 rounded-t-[2.5rem] bg-vanilla" />
 
       <p className="absolute bottom-6 left-6 z-20 text-sm font-medium text-blueberry">brut 2026</p>
 
