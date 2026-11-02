@@ -16,7 +16,7 @@ type Layer = {
 
 const WORD_CLASSES = "font-sans font-bold uppercase leading-none tracking-tight";
 const CLOUD_TEXT_CLASSES =
-  "block text-white [text-shadow:0_0_6px_rgb(255_255_255/0.9),0_0_18px_rgb(255_255_255/0.7),0_0_36px_rgb(255_255_255/0.5)]";
+  "block text-white will-change-transform [text-shadow:0_0_12px_rgb(255_255_255/0.35)]";
 const MAX_SKEW_DEG = 20;
 const SKEW_VELOCITY_DIVISOR = -300;
 
@@ -26,7 +26,7 @@ const LAYERS: readonly Layer[] = [
     word: "Leaf",
     containerClasses: "opacity-50",
     classes: "text-[clamp(0.75rem,1.2vw,1rem)]",
-    blurClasses: "blur-[1.5px]",
+    blurClasses: "blur-[1px]",
     positions: [
       [6, 14],
       [28, 22],
@@ -43,7 +43,7 @@ const LAYERS: readonly Layer[] = [
     word: "Leaf",
     containerClasses: "opacity-75",
     classes: "text-[clamp(1rem,1.8vw,1.5rem)]",
-    blurClasses: "blur-[0.8px]",
+    blurClasses: "blur-[0.5px]",
     positions: [
       [12, 70],
       [34, 82],
@@ -60,7 +60,7 @@ const LAYERS: readonly Layer[] = [
     word: "Plum",
     containerClasses: "",
     classes: "text-[clamp(1.25rem,2.6vw,2.25rem)]",
-    blurClasses: "blur-[0.3px]",
+    blurClasses: "",
     positions: [
       [4, 36],
       [22, 58],
@@ -105,13 +105,22 @@ export default function OrchardSection() {
           );
 
         gsap.to("[data-float]", {
-          x: "random(-8, 8)",
-          y: "random(-12, 12)",
-          duration: "random(3, 6)",
+          y: "random(-10, 10)",
+          duration: "random(4, 7)",
           ease: "sine.inOut",
+          yoyo: true,
           repeat: -1,
-          repeatRefresh: true,
-          delay: "random(0, 2)",
+          force3D: true,
+          delay: "random(0, 3)",
+        });
+        gsap.to("[data-float]", {
+          x: "random(-6, 6)",
+          duration: "random(6, 10)",
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
+          force3D: true,
+          delay: "random(0, 3)",
         });
 
         const scroll = gsap.timeline({
