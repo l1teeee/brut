@@ -53,9 +53,9 @@ export default function ConveyorSection() {
           scrollTrigger: {
             trigger: rootRef.current,
             start: "top top",
-            end: "+=200%",
+            end: "+=300%",
             pin: true,
-            scrub: 0.6,
+            scrub: 1.2,
           },
         });
         BELTS.forEach((belt, index) => {
