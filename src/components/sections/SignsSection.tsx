@@ -7,10 +7,10 @@ const COLOR_STEPS = 7;
 
 const COLOR_TRANSITION = "transition-colors duration-700 ease-out";
 
-const SECTION_CLASSES = "group relative h-svh overflow-hidden bg-sky-soft";
+const SECTION_CLASSES = "group relative h-svh overflow-hidden bg-purple";
 
 const BACKGROUND_CLASSES =
-  `absolute inset-0 rounded-t-[2.5rem] bg-chocolate ${COLOR_TRANSITION} ` +
+  `absolute inset-0 rounded-b-[2.5rem] bg-chocolate ${COLOR_TRANSITION} ` +
   "group-data-[step=3]:bg-olive group-data-[step=4]:bg-vanilla group-data-[step=5]:bg-apricot";
 
 const LEFT_WORD_CLASSES =

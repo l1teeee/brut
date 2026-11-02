@@ -174,11 +174,12 @@ export default function OrchardSection() {
     <section
       ref={rootRef}
       aria-labelledby="orchard-title"
-      className="relative h-svh overflow-hidden bg-linear-to-b from-sky-deep to-sky-soft"
+      className="relative h-svh overflow-hidden bg-chocolate"
     >
       <h2 id="orchard-title" className="sr-only">
         Orchard
       </h2>
+      <div aria-hidden="true" className="absolute inset-0 rounded-b-[2.5rem] bg-linear-to-b from-sky-deep to-sky-soft" />
       <p className="absolute left-6 top-6 z-20 text-2xl font-bold lowercase tracking-tight text-white">
         brut
       </p>
