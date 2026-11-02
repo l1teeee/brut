@@ -14,6 +14,8 @@ type Layer = {
 };
 
 const WORD_CLASSES = "font-sans font-bold uppercase leading-none tracking-tight";
+const MAX_SKEW_DEG = 20;
+const SKEW_VELOCITY_DIVISOR = -300;
 
 const LAYERS: readonly Layer[] = [
   {
@@ -68,11 +70,19 @@ const LAYERS: readonly Layer[] = [
 
 export default function OrchardSection() {
   const rootRef = useRef<HTMLElement>(null);
+  const pearRef = useRef<HTMLParagraphElement>(null);
 
   useGSAP(
     () => {
       const media = gsap.matchMedia();
       media.add("(prefers-reduced-motion: no-preference)", () => {
+        const pear = pearRef.current;
+        if (!pear) return;
+        const clampSkew = gsap.utils.clamp(-MAX_SKEW_DEG, MAX_SKEW_DEG);
+        const setPearSkew = gsap.quickSetter(pear, "skewX", "deg");
+        const skew = { value: 0 };
+        gsap.set(pear, { transformOrigin: "center center", force3D: true });
+
         gsap
           .timeline()
           .from("[data-word]", {
@@ -95,18 +105,25 @@ export default function OrchardSection() {
             end: "+=250%",
             pin: true,
             scrub: 0.6,
+            onUpdate: (self) => {
+              const target = clampSkew(self.getVelocity() / SKEW_VELOCITY_DIVISOR);
+              if (Math.abs(target) > Math.abs(skew.value)) {
+                skew.value = target;
+                gsap.to(skew, {
+                  value: 0,
+                  duration: 0.8,
+                  ease: "power3",
+                  overwrite: true,
+                  onUpdate: () => setPearSkew(skew.value),
+                });
+              }
+            },
           },
         });
         scroll
           .to("[data-layer='1']", { x: "-20vw", ease: "none", duration: 1 }, 0)
           .to("[data-layer='2']", { x: "-45vw", ease: "none", duration: 1 }, 0)
           .to("[data-layer='3']", { x: "-80vw", ease: "none", duration: 1 }, 0)
-          .fromTo(
-            "[data-pear]",
-            { rotation: -6, scale: 1 },
-            { rotation: 6, scale: 1.12, ease: "none", duration: 1 },
-            0,
-          )
           .to("[data-hint]", { autoAlpha: 0, ease: "none", duration: 0.1 }, 0);
       });
       return () => media.revert();
@@ -148,6 +165,7 @@ export default function OrchardSection() {
       </div>
       <div className="absolute inset-0 z-10 flex items-center justify-center">
         <p
+          ref={pearRef}
           data-pear
           className={`text-white text-[clamp(4rem,14vw,12rem)] ${WORD_CLASSES}`}
         >
