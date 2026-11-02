@@ -110,7 +110,7 @@ export default function CounterSection() {
       <h2 id="party-title" className="sr-only">
         Fruit party
       </h2>
-      <p className="absolute left-6 top-6 z-20 text-sm font-medium text-blueberry">04 / party</p>
+
       <p className="absolute bottom-6 left-6 z-20 text-sm font-medium text-blueberry">brut 2026</p>
 
       <div
