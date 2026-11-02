@@ -1,4 +1,5 @@
 import GrainOverlay from "@/components/GrainOverlay";
+import Loader from "@/components/Loader";
 import ConveyorSection from "@/components/sections/ConveyorSection";
 import CounterSection from "@/components/sections/CounterSection";
 import OrchardSection from "@/components/sections/OrchardSection";
@@ -23,6 +24,7 @@ export default function Home() {
       <ScrollSound />
       <SoundToggle />
       <ScrollIndicator />
+      <Loader />
     </>
   );
 }
