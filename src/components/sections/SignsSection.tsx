@@ -3,15 +3,31 @@
 import { useRef } from "react";
 import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 
-const SIGN_WORDS: readonly string[] = ["Ripe now", "Hand-cut"];
+const COLOR_STEPS = 7;
 
-const COLOR_STEPS = 4;
+const COLOR_TRANSITION = "transition-colors duration-700 ease-out";
 
 const SECTION_CLASSES =
-  "relative h-svh overflow-hidden bg-chocolate text-apricot transition-colors duration-700 ease-out " +
-  "data-[step=1]:bg-vanilla data-[step=1]:text-olive " +
-  "data-[step=2]:bg-apricot data-[step=2]:text-chocolate " +
-  "data-[step=3]:bg-olive data-[step=3]:text-vanilla";
+  `group relative h-svh overflow-hidden bg-chocolate ${COLOR_TRANSITION} ` +
+  "data-[step=3]:bg-olive data-[step=4]:bg-vanilla data-[step=5]:bg-apricot";
+
+const LEFT_WORD_CLASSES =
+  `text-apricot ${COLOR_TRANSITION} ` +
+  "group-data-[step=1]:text-vanilla group-data-[step=2]:text-vanilla group-data-[step=3]:text-vanilla " +
+  "group-data-[step=4]:text-chocolate group-data-[step=5]:text-vanilla";
+
+const RIGHT_WORD_CLASSES =
+  `text-apricot ${COLOR_TRANSITION} ` +
+  "group-data-[step=2]:text-vanilla group-data-[step=3]:text-vanilla " +
+  "group-data-[step=4]:text-olive group-data-[step=5]:text-chocolate group-data-[step=6]:text-vanilla";
+
+const WORD_CLASSES =
+  "font-sans font-bold uppercase leading-none tracking-tight text-[clamp(1.75rem,3.6vw,3.25rem)]";
+
+const SIGN_WORDS: readonly { text: string; classes: string }[] = [
+  { text: "Ripe now", classes: LEFT_WORD_CLASSES },
+  { text: "Hand-cut", classes: RIGHT_WORD_CLASSES },
+];
 
 export default function SignsSection() {
   const rootRef = useRef<HTMLElement>(null);
@@ -26,7 +42,7 @@ export default function SignsSection() {
         ScrollTrigger.create({
           trigger: root,
           start: "top top",
-          end: "+=300%",
+          end: "+=500%",
           pin: true,
           onUpdate: (self) => {
             const step = Math.min(COLOR_STEPS - 1, Math.floor(self.progress * COLOR_STEPS));
@@ -50,11 +66,8 @@ export default function SignsSection() {
       </h2>
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-[6vh] px-6 sm:flex-row sm:gap-[12vw]">
         {SIGN_WORDS.map((word) => (
-          <p
-            key={word}
-            className="font-sans font-bold uppercase leading-none tracking-tight text-[clamp(1.75rem,3.6vw,3.25rem)]"
-          >
-            {word}
+          <p key={word.text} className={`${WORD_CLASSES} ${word.classes}`}>
+            {word.text}
           </p>
         ))}
       </div>
