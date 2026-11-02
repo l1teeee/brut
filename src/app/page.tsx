@@ -1,3 +1,4 @@
+import GrainOverlay from "@/components/GrainOverlay";
 import ConveyorSection from "@/components/sections/ConveyorSection";
 import CounterSection from "@/components/sections/CounterSection";
 import OrchardSection from "@/components/sections/OrchardSection";
@@ -16,6 +17,7 @@ export default function Home() {
           <CounterSection />
         </main>
       </SmoothScroll>
+      <GrainOverlay />
       <ScrollIndicator />
     </>
   );
