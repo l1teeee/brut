@@ -1,19 +1,19 @@
-const MASTER_GAIN = 0.6;
+const MASTER_GAIN = 1;
 const NOISE_SECONDS = 2;
 
-const WIND_FILTER_BASE_HZ = 300;
+const WIND_FILTER_BASE_HZ = 400;
 const WIND_FILTER_RANGE_HZ = 600;
-const WIND_MAX_GAIN = 0.05;
+const WIND_MAX_GAIN = 0.12;
 const WIND_SMOOTHING_SECONDS = 0.3;
 
-const NOTE_PEAK_GAIN = 0.06;
+const NOTE_PEAK_GAIN = 0.15;
 const NOTE_DECAY_SECONDS = 1.2;
-const TICK_PEAK_GAIN = 0.025;
-const TICK_DECAY_SECONDS = 0.05;
-const RUMBLE_PEAK_GAIN = 0.07;
+const TICK_PEAK_GAIN = 0.08;
+const TICK_DECAY_SECONDS = 0.08;
+const RUMBLE_PEAK_GAIN = 0.18;
 const RUMBLE_ATTACK_SECONDS = 0.15;
 const RUMBLE_DECAY_SECONDS = 0.7;
-const RUMBLE_FILTER_HZ = 180;
+const RUMBLE_FILTER_HZ = 260;
 const CHORD_STAGGER_SECONDS = 0.06;
 
 const UNLOCK_EVENTS = ["pointerdown", "keydown", "touchstart"] as const;
