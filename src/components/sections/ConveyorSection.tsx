@@ -81,7 +81,7 @@ export default function ConveyorSection() {
       <h2 id="sorting-title" className="sr-only">
         Sorting
       </h2>
-      <p className="absolute left-6 top-6 text-sm font-medium text-milk">03 / sorting</p>
+
       <div className="absolute inset-0 flex flex-col justify-center gap-[6vh] px-6">
         {BELTS.map((belt, index) => (
           <div key={belt.number} className="flex items-center gap-[3vw]">

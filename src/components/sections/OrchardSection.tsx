@@ -19,8 +19,8 @@ const LAYERS: readonly Layer[] = [
   {
     id: "1",
     word: "Leaf",
-    containerClasses: "opacity-70",
-    classes: "text-sage text-[clamp(0.75rem,1.2vw,1rem)]",
+    containerClasses: "opacity-50",
+    classes: "text-white text-[clamp(0.75rem,1.2vw,1rem)]",
     positions: [
       [6, 14],
       [28, 22],
@@ -35,8 +35,8 @@ const LAYERS: readonly Layer[] = [
   {
     id: "2",
     word: "Leaf",
-    containerClasses: "",
-    classes: "text-sage text-[clamp(1rem,1.8vw,1.5rem)]",
+    containerClasses: "opacity-75",
+    classes: "text-white text-[clamp(1rem,1.8vw,1.5rem)]",
     positions: [
       [12, 70],
       [34, 82],
@@ -52,7 +52,7 @@ const LAYERS: readonly Layer[] = [
     id: "3",
     word: "Plum",
     containerClasses: "",
-    classes: "text-plum text-[clamp(1.25rem,2.6vw,2.25rem)]",
+    classes: "text-white text-[clamp(1.25rem,2.6vw,2.25rem)]",
     positions: [
       [4, 36],
       [22, 58],
@@ -118,16 +118,13 @@ export default function OrchardSection() {
     <section
       ref={rootRef}
       aria-labelledby="orchard-title"
-      className="relative h-svh overflow-hidden bg-dusty-blue"
+      className="relative h-svh overflow-hidden bg-linear-to-b from-sky-deep to-sky-soft"
     >
       <h2 id="orchard-title" className="sr-only">
         Orchard
       </h2>
-      <p className="absolute left-6 top-6 z-20 text-2xl font-bold lowercase tracking-tight text-honey">
+      <p className="absolute left-6 top-6 z-20 text-2xl font-bold lowercase tracking-tight text-white">
         brut
-      </p>
-      <p className="absolute right-6 top-6 z-20 text-sm font-medium text-sage">
-        01 / orchard
       </p>
       <div aria-hidden="true" className="absolute inset-0">
         {LAYERS.map((layer) => (
@@ -152,7 +149,7 @@ export default function OrchardSection() {
       <div className="absolute inset-0 z-10 flex items-center justify-center">
         <p
           data-pear
-          className={`text-honey text-[clamp(4rem,14vw,12rem)] ${WORD_CLASSES}`}
+          className={`text-white text-[clamp(4rem,14vw,12rem)] ${WORD_CLASSES}`}
         >
           Pear
         </p>
@@ -160,7 +157,7 @@ export default function OrchardSection() {
       <p
         data-hint
         aria-hidden="true"
-        className="absolute inset-x-0 bottom-8 z-20 text-center text-2xl text-honey"
+        className="absolute inset-x-0 bottom-8 z-20 text-center text-2xl text-white/80"
       >
         {"\u2193"}
       </p>

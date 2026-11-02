@@ -50,7 +50,7 @@ export default function SignsSection() {
       <h2 id="kitchen-title" className="sr-only">
         Kitchen
       </h2>
-      <p className="absolute left-6 top-6 text-sm font-medium text-vanilla">02 / kitchen</p>
+
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-[8vh] px-6">
         <div className="flex flex-wrap items-center justify-center gap-[4vw]">
           {SIGN_LABELS.map((label) => (
