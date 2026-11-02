@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef } from "react";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { useEffect, useRef, useState } from "react";
+import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { createWindSound, type WindSound } from "@/lib/wind-sound";
 
 type Position = readonly [number, number];
 
@@ -16,6 +17,8 @@ const WORD_CLASSES = "font-sans font-bold uppercase leading-none tracking-tight"
 const CLOUD_TEXT_CLASSES = "block text-white will-change-transform";
 const MAX_SKEW_DEG = 20;
 const SKEW_VELOCITY_DIVISOR = -300;
+const WIND_FULL_VELOCITY = 2500;
+const STORM_HOVER_CLASSES = "pointer-events-auto inline-block transition-colors duration-300 hover:animate-storm hover:text-storm";
 
 const LAYERS: readonly Layer[] = [
   {
@@ -68,6 +71,12 @@ const LAYERS: readonly Layer[] = [
 export default function OrchardSection() {
   const rootRef = useRef<HTMLElement>(null);
   const pearRef = useRef<HTMLParagraphElement>(null);
+  const windRef = useRef<WindSound | null>(null);
+  const [muted, setMuted] = useState(false);
+
+  useEffect(() => {
+    windRef.current?.setMuted(muted);
+  }, [muted]);
 
   useGSAP(
     () => {
@@ -79,6 +88,10 @@ export default function OrchardSection() {
         const setPearSkew = gsap.quickSetter(pear, "skewX", "deg");
         const skew = { value: 0 };
         gsap.set(pear, { transformOrigin: "center center", force3D: true });
+        const wind = createWindSound();
+        windRef.current = wind;
+        const calmWind = () => wind.setIntensity(0);
+        ScrollTrigger.addEventListener("scrollEnd", calmWind);
 
         gsap
           .timeline()
@@ -122,6 +135,7 @@ export default function OrchardSection() {
             pin: true,
             scrub: 1.2,
             onUpdate: (self) => {
+              wind.setIntensity(Math.abs(self.getVelocity()) / WIND_FULL_VELOCITY);
               const target = clampSkew(self.getVelocity() / SKEW_VELOCITY_DIVISOR);
               if (Math.abs(target) > Math.abs(skew.value)) {
                 skew.value = target;
@@ -134,6 +148,9 @@ export default function OrchardSection() {
                 });
               }
             },
+            onToggle: (self) => {
+              if (!self.isActive) calmWind();
+            },
           },
         });
         scroll
@@ -141,6 +158,12 @@ export default function OrchardSection() {
           .to("[data-layer='2']", { x: "-45vw", ease: "none", duration: 1 }, 0)
           .to("[data-layer='3']", { x: "-80vw", ease: "none", duration: 1 }, 0)
           .to("[data-hint]", { autoAlpha: 0, ease: "none", duration: 0.1 }, 0);
+
+        return () => {
+          ScrollTrigger.removeEventListener("scrollEnd", calmWind);
+          wind.dispose();
+          windRef.current = null;
+        };
       });
       return () => media.revert();
     },
@@ -159,7 +182,15 @@ export default function OrchardSection() {
       <p className="absolute left-6 top-6 z-20 text-2xl font-bold lowercase tracking-tight text-white">
         brut
       </p>
-      <div aria-hidden="true" className="absolute inset-0">
+      <button
+        type="button"
+        aria-pressed={!muted}
+        onClick={() => setMuted((value) => !value)}
+        className="absolute right-6 top-6 z-20 text-sm font-medium lowercase tracking-tight text-white/80 transition-colors hover:text-white"
+      >
+        {muted ? "sound off" : "sound on"}
+      </button>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         {LAYERS.map((layer) => (
           <div
             key={layer.id}
@@ -174,29 +205,25 @@ export default function OrchardSection() {
                 style={{ left: `${x}vw`, top: `${y}%` }}
               >
                 <span data-float className={`${CLOUD_TEXT_CLASSES} ${WORD_CLASSES} ${layer.classes}`}>
-                  {layer.word}
+                  <span className={STORM_HOVER_CLASSES}>{layer.word}</span>
                 </span>
               </span>
             ))}
           </div>
         ))}
       </div>
-      <div className="absolute inset-0 z-10 flex items-center justify-center">
+      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
         <p
           ref={pearRef}
           data-pear
           className={`text-white text-[clamp(4rem,14vw,12rem)] ${WORD_CLASSES}`}
         >
-          Pear
+          <span className={STORM_HOVER_CLASSES}>Pear</span>
         </p>
       </div>
-      <p
-        data-hint
-        aria-hidden="true"
-        className="absolute inset-x-0 bottom-8 z-20 text-center text-2xl text-white/80"
-      >
-        {"\u2193"}
-      </p>
+      <div data-hint aria-hidden="true" className="absolute inset-x-0 bottom-8 z-20 flex justify-center">
+        <span className="size-1.5 animate-pulse rounded-full bg-white shadow-[0_0_10px_rgb(255_255_255/0.8)]" />
+      </div>
     </section>
   );
 }
